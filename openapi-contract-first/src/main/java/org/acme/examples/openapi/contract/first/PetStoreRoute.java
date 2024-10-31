@@ -19,18 +19,12 @@ package org.acme.examples.openapi.contract.first;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import sample.petstore.model.Pet;
-import sample.petstore.model.Pet.StatusEnum;
 
 /**
  * Camel routes for the PetStore example
  */
 @ApplicationScoped
 public class PetStoreRoute extends RouteBuilder {
-
-    @ConfigProperty(name = "pet.name")
-    private String petName;
 
     @Override
     public void configure() throws Exception {
@@ -40,20 +34,5 @@ public class PetStoreRoute extends RouteBuilder {
 
         rest().openApi().specification("petstore.json").missingOperation("ignore");
 
-        from("direct:getPetById")
-                .process(e -> {
-                    // build response body as POJO
-                    Pet pet = new Pet();
-                    pet.setId(e.getMessage().getHeader("petId", long.class));
-                    pet.setName(petName);
-                    pet.setStatus(StatusEnum.AVAILABLE);
-                    e.getMessage().setBody(pet);
-                });
-
-        from("direct:updatePet")
-                .process(e -> {
-                    Pet pet = e.getMessage().getBody(Pet.class);
-                    pet.setStatus(StatusEnum.PENDING);
-                });
     }
 }
